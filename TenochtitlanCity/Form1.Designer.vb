@@ -27,6 +27,8 @@ Partial Class Form1
         Me.ButtonTrafico = New System.Windows.Forms.Button()
         Me.ButtonViento = New System.Windows.Forms.Button()
         Me.dwgActual = New System.Windows.Forms.Label()
+        Me.ListBox1 = New System.Windows.Forms.ListBox()
+        Me.Button1 = New System.Windows.Forms.Button()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -38,7 +40,7 @@ Partial Class Form1
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Padding = New System.Windows.Forms.Padding(4, 3, 0, 3)
-        Me.MenuStrip1.Size = New System.Drawing.Size(654, 55)
+        Me.MenuStrip1.Size = New System.Drawing.Size(817, 55)
         Me.MenuStrip1.TabIndex = 0
         Me.MenuStrip1.Text = "MenuStrip1"
         '
@@ -59,10 +61,10 @@ Partial Class Form1
         Me.ButtonTrafico.BackColor = System.Drawing.SystemColors.ButtonHighlight
         Me.ButtonTrafico.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center
         Me.ButtonTrafico.Font = New System.Drawing.Font("Gabriola", 13.8!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.ButtonTrafico.Location = New System.Drawing.Point(251, 146)
+        Me.ButtonTrafico.Location = New System.Drawing.Point(263, 129)
         Me.ButtonTrafico.Margin = New System.Windows.Forms.Padding(2, 4, 2, 4)
         Me.ButtonTrafico.Name = "ButtonTrafico"
-        Me.ButtonTrafico.Size = New System.Drawing.Size(178, 63)
+        Me.ButtonTrafico.Size = New System.Drawing.Size(305, 47)
         Me.ButtonTrafico.TabIndex = 1
         Me.ButtonTrafico.Text = "Simulador Tráfico"
         Me.ButtonTrafico.UseVisualStyleBackColor = False
@@ -74,10 +76,10 @@ Partial Class Form1
         Me.ButtonViento.BackColor = System.Drawing.SystemColors.ButtonHighlight
         Me.ButtonViento.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center
         Me.ButtonViento.Font = New System.Drawing.Font("Gabriola", 13.8!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.ButtonViento.Location = New System.Drawing.Point(251, 243)
+        Me.ButtonViento.Location = New System.Drawing.Point(263, 201)
         Me.ButtonViento.Margin = New System.Windows.Forms.Padding(2, 4, 2, 4)
         Me.ButtonViento.Name = "ButtonViento"
-        Me.ButtonViento.Size = New System.Drawing.Size(178, 62)
+        Me.ButtonViento.Size = New System.Drawing.Size(305, 51)
         Me.ButtonViento.TabIndex = 2
         Me.ButtonViento.Text = "Simulador Viento"
         Me.ButtonViento.UseVisualStyleBackColor = False
@@ -87,13 +89,32 @@ Partial Class Form1
         Me.dwgActual.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.dwgActual.AutoSize = True
         Me.dwgActual.BackColor = System.Drawing.SystemColors.ActiveCaption
-        Me.dwgActual.Location = New System.Drawing.Point(468, 9)
+        Me.dwgActual.Location = New System.Drawing.Point(631, 9)
         Me.dwgActual.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.dwgActual.Name = "dwgActual"
         Me.dwgActual.Size = New System.Drawing.Size(157, 37)
         Me.dwgActual.TabIndex = 3
         Me.dwgActual.Text = "... Esperando Conexión"
         Me.dwgActual.TextAlign = System.Drawing.ContentAlignment.TopRight
+        '
+        'ListBox1
+        '
+        Me.ListBox1.FormattingEnabled = True
+        Me.ListBox1.ItemHeight = 37
+        Me.ListBox1.Location = New System.Drawing.Point(181, 271)
+        Me.ListBox1.Name = "ListBox1"
+        Me.ListBox1.Size = New System.Drawing.Size(487, 263)
+        Me.ListBox1.TabIndex = 4
+        '
+        'Button1
+        '
+        Me.Button1.Font = New System.Drawing.Font("Gabriola", 13.8!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Button1.Location = New System.Drawing.Point(593, 574)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(159, 49)
+        Me.Button1.TabIndex = 5
+        Me.Button1.Text = "Detener"
+        Me.Button1.UseVisualStyleBackColor = True
         '
         'Form1
         '
@@ -102,7 +123,9 @@ Partial Class Form1
         Me.BackColor = System.Drawing.SystemColors.ActiveCaption
         Me.BackgroundImage = Global.TenochtitlanCity.My.Resources.Resources.image
         Me.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom
-        Me.ClientSize = New System.Drawing.Size(654, 492)
+        Me.ClientSize = New System.Drawing.Size(817, 683)
+        Me.Controls.Add(Me.Button1)
+        Me.Controls.Add(Me.ListBox1)
         Me.Controls.Add(Me.dwgActual)
         Me.Controls.Add(Me.ButtonViento)
         Me.Controls.Add(Me.ButtonTrafico)
@@ -124,4 +147,6 @@ Partial Class Form1
     Friend WithEvents ButtonTrafico As Button
     Friend WithEvents ButtonViento As Button
     Friend WithEvents dwgActual As Label
+    Friend WithEvents ListBox1 As ListBox
+    Friend WithEvents Button1 As Button
 End Class

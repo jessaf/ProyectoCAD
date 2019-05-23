@@ -47,6 +47,10 @@
 
     End Sub
 
+    Public Function DetenerSimulacion()
+        Exit Function
+    End Function
+
     Public Function conjunto_vacio(ByRef DOCUMENTO As AcadDocument, ByRef nombre As String) As AcadSelectionSet
 
         'Esta funcion no reserva espacio en memoria para un conjunto vacio en el cual meter objetos.
@@ -142,12 +146,14 @@
         Dim conjuntoTemp As AcadSelectionSet = Nothing
         Dim conjuntoVehiculos As AcadSelectionSet = Nothing
         Dim conjuntoCallesEnBorde As AcadSelectionSet = Nothing
+        Dim conjuntoSemaforos As AcadSelectionSet = Nothing
         Dim element As AcadEntity
         Dim vehiculo As AcadEntity
         Dim lines() As AcadEntity
         Dim calle As AcadEntity
         Dim temp(0) As AcadEntity
         Dim temp2(0) As AcadEntity
+        Dim temp3(0) As AcadEntity
         Dim contorno As AcadEntity = Nothing
         Dim nextStreet As AcadEntity
         Dim lista As ListBox
@@ -167,13 +173,6 @@
         Dim fileName As String, textData As String, textRow As String, fileNo As Integer
         Dim numCarros As Integer
 
-        '
-        'lista = Form1.ListBox1
-        'lista.Items.Clear()
-
-
-
-
         '===================================================================================
         'PASO 1 Encontrando calles, contornos y demas 
         '===================================================================================
@@ -185,6 +184,7 @@
         conjuntoTemp = conjunto_vacio(DOCUMENTO, "Temp")
         conjuntoVehiculos = conjunto_vacio(DOCUMENTO, "Vehiculos")
         conjuntoCallesEnBorde = conjunto_vacio(DOCUMENTO, "Borde")
+        conjuntoSemaforos = conjunto_vacio(DOCUMENTO, "Semaforos")
         conjunto.Select(AcSelect.acSelectionSetAll)
 
 
@@ -193,7 +193,7 @@
             'Obtenemos el contorno
             If element.ObjectName = "AcDbPolyline" Then
                 contorno = element
-                MsgBox("Se encontro el contorno")
+                'MsgBox("Se encontro el contorno")
 
             End If
             'Obtenemos las calles
@@ -201,6 +201,10 @@
                 temp2(0) = element
                 conjuntoCalles.AddItems(temp2)
                 'MsgBox("Se ha agregado elemento a calles")
+            End If
+            If element.ObjectName = "AcDbCircle" Then
+                temp3(0) = element
+                conjuntoSemaforos.AddItems(temp3)
             End If
         Next
 
@@ -211,12 +215,6 @@
 
         'PRIMERO PROCEDEMOS A CREAR LOS VEHICULOS EN AQUELLAS INTERSECCIONES ENTRE LAS CALLES Y EL CONTORNO
         numCarros = CreandoVehiculos(conjuntoCalles, conjuntoVehiculos, conjuntoCallesEnBorde, contorno, lista)
-
-
-
-
-
-
 
         '=========================================================================================================
         ''Esta seccion es la que se tiene que tener para que los vehicuos se muevan al mismo tiempo y no uno despues del otro 
@@ -255,17 +253,6 @@
 
         'Loop
 
-
-
-
-
-
-
-
-
-
-
-
         '=========================================================================================================
         'Esta seccion funciona actualmente 
         '=========================================================================================================
@@ -274,7 +261,7 @@
             nextStreet = getNextStreet(getNextPosibleStreets(vehiculo, conjuntoCalles, conjuntoCallesEnBorde, numCalles, lista), numCalles)
             If Not IsNothing(nextStreet) Then
                 GirarVehiculoSegunOrientacionDeLaCalle(nextStreet, vehiculo, lista)
-                moverVehiculo(nextStreet, vehiculo, 200, lista)
+                moverVehiculo(nextStreet, vehiculo, 5, lista)
             Else
                 MsgBox("Saltamos ese vehiculo por no encontrar calle siguiente")
             End If
@@ -334,7 +321,7 @@
                 tempcallesenborde(0) = calle
                 conjuntoCallesEnBorde.AddItems(tempcallesenborde)
                 tempcontadorcallesencontorno = tempcontadorcallesencontorno + 1
-                MsgBox("Se encontro nueva calle en el contorno")
+                'MsgBox("Se encontro nueva calle en el contorno")
 
 
 
@@ -459,6 +446,10 @@
                 currentPosition(0) = nextPosition(0)
                 currentPosition(1) = nextPosition(1)
 
+                AnalizandoEntornoCircular(currentPosition)
+                MsgBox("analizo")
+
+
             End If
             vehiculo.Update()
 
@@ -466,6 +457,98 @@
             'WasteTime(1)
             'PauseEvent(1)
         Next
+
+    End Function
+
+    Public Sub AnalizandoEntornoCircular(p() As Double)
+        '###  Funcion que analiza dentro de un entorno circular los objetos que se encuentran al rededor del vehículo
+        'Esta funcion se manda a llamar cada vez que se actualiza la posicion del vehiculo
+
+        Dim conjunto As AcadSelectionSet
+        'Dim delta As Double = 500
+        Dim esquinas(11) As Double
+        Dim lista As ListBox = Form1.ListBox1 'para mostrar en un list box los objetos que fueron encontrados dentro del área analizada
+        Dim perimetro As AcadPolyline = Nothing
+        Dim radio As Double
+
+        'appactivateAutoCAD()
+        radio = 3.0
+
+        If Not IsNothing(p) Then
+
+            esquinas = generaCoordenadasCirculos(p, radio, 0, 360, 20)
+            perimetro = drawPolygon(esquinas) 'trazando el poligono de busqueda
+
+            conjunto = conjunto_vacio(DOCUMENTO, "Crossing elements")
+            conjunto.SelectByPolygon(AcSelect.acSelectionSetCrossingPolygon, esquinas)
+
+            lista.Items.Clear()
+
+            For Each element In conjunto
+                'no reportamos el perimetro generado
+                If element.handle <> perimetro.Handle Then
+                    If element.ObjectName <> "AcDb3dSolid" Then
+                        lista.Items.Add(element.handle & " " & element.ObjectName)
+                    End If
+                End If
+            Next
+            conjunto.Delete()
+        End If
+        perimetro.Delete()
+
+    End Sub
+
+    Public Function generaCoordenadasCirculos(p() As Double, radio As Double, angInicial As Double, angFinal As Double, avances As Integer) As Double()
+        'grados estan Angulos esta en grados
+        'Debe regresar un arreglo lineal donde cada 3 elementos son una coordenada
+
+        Dim angulo As Double
+        Dim anguloDeAvance As Double
+        Dim pCirculo() As Double
+        Dim pPolar() As Double
+        Dim pN As Integer
+        'Dim angFinal As Double
+
+        pN = 0
+
+        anguloDeAvance = convertAngtoRad(angFinal - angInicial) / avances 'radianes
+        angulo = convertAngtoRad(angInicial)
+        For i = 1 To avances
+            pPolar = DOCUMENTO.Utility.PolarPoint(p, angulo, radio)
+            'Una coordenada polar requiere estos datos. Se avanca el numero de grados dividido entre el numero de puntos que tengo,. Esto se pudo hacer por seno y coseno pero se prefirio hacerlo así. 
+            ReDim Preserve pCirculo(pN + 2)
+            pCirculo(pN) = pPolar(0) : pCirculo(pN + 1) = pPolar(1) : pCirculo(pN + 2) = 0
+            'Esto es un arreglo dinamico de coordenadas. 
+            angulo = angulo + anguloDeAvance
+            pN = pN + 3
+        Next
+        Return pCirculo
+
+    End Function
+
+    Public Function convertAngtoRad(anguloGrados As Double) As Double
+        Return (anguloGrados * 3.1416 / 180.0)
+    End Function
+
+    Public Function drawPolygon(ByVal coordenadas() As Double) As AcadPolyline
+        'genera un poligono en el modelspace
+        Dim perimetro As AcadPolyline
+        Dim uB As Integer
+        Dim uI As Integer
+        uI = coordenadas.GetUpperBound(0)
+        'redimensionando el arreglo dinamico para que acepte una coordenada adicional
+        uB = uI + 3
+        ReDim Preserve coordenadas(uB)
+
+        'agregagndo nuevaente la primera coordenada para generar un poligono cerrado
+        coordenadas(uI + 1) = coordenadas(0)
+        coordenadas(uI + 2) = coordenadas(1)
+        coordenadas(uI + 3) = coordenadas(2)
+
+        'crando el poligono cerrado
+        perimetro = DOCUMENTO.ModelSpace.AddPolyline(coordenadas)
+        perimetro.Update()
+        Return perimetro
 
     End Function
 
@@ -572,9 +655,9 @@
             If centroide(0) = p1calle(0) And centroide(1) = p1calle(1) Then
                 callesenlainterseccion.Add(calle)
                 numCalles = numCalles + 1
-                MsgBox("Se encontraron posibles calles para avanzar #calles = " & callesenlainterseccion.Count)
             End If
         Next
+        MsgBox("Se encontraron posibles calles para avanzar #calles = " & callesenlainterseccion.Count)
 
         If callesenlainterseccion.Count = 0 Then
             callesenlainterseccion.Clear()
