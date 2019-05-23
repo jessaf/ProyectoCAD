@@ -205,8 +205,24 @@
             If element.ObjectName = "AcDbCircle" Then
                 temp3(0) = element
                 conjuntoSemaforos.AddItems(temp3)
+
             End If
         Next
+
+        '##########################################################
+        '##########################################################
+        '##########################################################
+        '  asignando diccionarios con valores para los semaforo
+
+        MsgBox("numero de semaforos:" & conjuntoSemaforos.Count)
+
+        For Each element In conjuntoSemaforos
+            addXdata(element, "LUZ", varColor)
+        Next
+
+
+
+
 
         '===================================================================================
         'PASO 2 Crear los vehiculos en las calles
@@ -446,7 +462,7 @@
                 currentPosition(0) = nextPosition(0)
                 currentPosition(1) = nextPosition(1)
 
-                AnalizandoEntornoCircular(currentPosition)
+                AnalizandoEntornoCircular(currentPosition) 'analiza lo que hay en la nueva posicion a la que llega
                 MsgBox("analizo")
 
 
@@ -487,8 +503,14 @@
             For Each element In conjunto
                 'no reportamos el perimetro generado
                 If element.handle <> perimetro.Handle Then
-                    If element.ObjectName <> "AcDb3dSolid" Then
-                        lista.Items.Add(element.handle & " " & element.ObjectName)
+                    If element.ObjectName <> "AcDb3dSolid" Then ' se exluye el auto 
+                        lista.Items.Add(element.handle & " " & element.ObjectName) 'muestra en la lista los objetos encontrado
+                        '####################
+                        'hacer condiciones de los semaforos obteniendo los valores de los diccionario 
+                        ' if valor del luz del dicc == roja
+                        '   detenerse x tiempo
+
+
                     End If
                 End If
             Next
