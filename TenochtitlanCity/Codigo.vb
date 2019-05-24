@@ -179,13 +179,14 @@
 
         'ObteniendoInfoDelPlano(conjuntoCalles, conjuntoVehiculos, conjuntoTemp, conjunto, contorno)
         'Creamos los conjuntos con los cuales trabajaremos
-        conjunto = conjunto_vacio(DOCUMENTO, "IDLE")
+        conjunto = conjunto_vacio(DOCUMENTO, "Plano")
         conjuntoCalles = conjunto_vacio(DOCUMENTO, "Calles")
         conjuntoTemp = conjunto_vacio(DOCUMENTO, "Temp")
         conjuntoVehiculos = conjunto_vacio(DOCUMENTO, "Vehiculos")
         conjuntoCallesEnBorde = conjunto_vacio(DOCUMENTO, "Borde")
         conjuntoSemaforos = conjunto_vacio(DOCUMENTO, "Semaforos")
         conjunto.Select(AcSelect.acSelectionSetAll)
+
 
 
         'Clasificamos en conjuntos los elementos encontrados en el plano
@@ -216,13 +217,9 @@
 
         MsgBox("numero de semaforos:" & conjuntoSemaforos.Count)
 
-        For Each element In conjuntoSemaforos
-            addXdata(element, "LUZ", varColor)
-        Next
-
-
-
-
+        'For Each element In conjuntoSemaforos
+        ' addXdata(element, "LUZ", varColor)
+        ' Next
 
         '===================================================================================
         'PASO 2 Crear los vehiculos en las calles
@@ -248,7 +245,6 @@
         '        'Obtenemos el paso actual y el numero de pasos a ejecutar
         '        pasoactual = CInt(GetDictionaryVehiculo(vehiculo, "PASOACTUAL", valor))
         '        numsteps = CInt(GetDictionaryVehiculo(vehiculo, "NUMSTEPS", valor))
-
         '        'Si el paso actual no es el inicial entonces estamos en un punto intermedio de la calle 
         '        If ((pasoactual <> 1) And (pasoactual < numsteps)) Then
         '            moverVehiculo(nextStreet, vehiculo, 200, lista)
@@ -284,12 +280,10 @@
 
         Next
 
-
-
-
-
         'conjunto.Delete()
     End Function
+
+
     Public Function CreandoVehiculos(conjuntoCalles As AcadSelectionSet, conjuntoVehiculos As AcadSelectionSet, conjuntoCallesEnBorde As AcadSelectionSet, contorno As AcadEntity, lista As ListBox) As Integer
         'eSTA FUNCION CREA LOS VEHICULOS EN LAS INTERSECCIONES CON EL CONTORNO (POLILINEA)
         Dim calle As AcadEntity
@@ -319,7 +313,6 @@
 
             'Pregunto si hay interseccion entre la calle y el contorno y si la hay guardo el punto de interseccion en el arreglo arrcontorno
             arrcontorno = contorno.IntersectWith(calle, AcExtendOption.acExtendNone)
-
 
 
             'Si el tamanio del arreglo es mayor a cero entonces tiene las coordenadas guardadas por lo que en efecto hubo interseccion
@@ -353,7 +346,7 @@
                 ''''''''''''''       aparecer carro
 
                 'CREAMOS EL VEHICULO EN EL PUNTO INICIAL DE LA CALLE 
-                vehiculo = DOCUMENTO.ModelSpace.AddBox(p1, 2, 1, 2)
+                vehiculo = DOCUMENTO.ModelSpace.AddBox(p1, 7, 5, 7)
                 'Le agregamos su respectivo diccionario
                 AddDictionaryToVehiculo(vehiculo)
                 temp(0) = vehiculo
@@ -463,7 +456,7 @@
                 currentPosition(1) = nextPosition(1)
 
                 AnalizandoEntornoCircular(currentPosition) 'analiza lo que hay en la nueva posicion a la que llega
-                MsgBox("analizo")
+                'MsgBox("analizo")
 
 
             End If
@@ -488,32 +481,36 @@
         Dim radio As Double
 
         'appactivateAutoCAD()
-        radio = 3.0
+        radio = 8.0
 
         If Not IsNothing(p) Then
 
             esquinas = generaCoordenadasCirculos(p, radio, 0, 360, 20)
             perimetro = drawPolygon(esquinas) 'trazando el poligono de busqueda
 
-            conjunto = conjunto_vacio(DOCUMENTO, "Crossing elements")
+            conjunto = conjunto_vacio(DOCUMENTO, "CrossingElements")
             conjunto.SelectByPolygon(AcSelect.acSelectionSetCrossingPolygon, esquinas)
 
             lista.Items.Clear()
+            If Not IsNothing(conjunto) Then
 
-            For Each element In conjunto
-                'no reportamos el perimetro generado
-                If element.handle <> perimetro.Handle Then
-                    If element.ObjectName <> "AcDb3dSolid" Then ' se exluye el auto 
-                        lista.Items.Add(element.handle & " " & element.ObjectName) 'muestra en la lista los objetos encontrado
-                        '####################
-                        'hacer condiciones de los semaforos obteniendo los valores de los diccionario 
-                        ' if valor del luz del dicc == roja
-                        '   detenerse x tiempo
+                For Each element In conjunto
+                    'no reportamos el perimetro generado
+                    If element.handle <> perimetro.Handle Then
+                        If element.ObjectName <> "AcDb3dSolid" Then ' se exluye el auto 
+                            lista.Items.Add(element.handle & " " & element.ObjectName) 'muestra en la lista los objetos encontrado
+                            '####################
+                            'hacer condiciones de los semaforos obteniendo los valores de los diccionario 
+                            ' if valor del luz del dicc == roja
+                            '   detenerse x tiempo
 
 
+                        End If
                     End If
-                End If
-            Next
+                Next
+
+
+            End If
             conjunto.Delete()
         End If
         perimetro.Delete()
